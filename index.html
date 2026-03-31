@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexTrader — Institutional-Grade Algorithmic Trading</title>
+  <meta name="description" content="Five battle-tested algorithmic strategies across US equities and crypto markets — automated, disciplined, institutional-grade risk controls.">
+  <meta name="keywords" content="algorithmic trading, automated trading, quant trading, signal service, trading system, ApexTrader">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://apextrader.io">
+  <meta property="og:title" content="ApexTrader — Algorithmic Trading, Institutional Grade">
+  <meta property="og:description" content="Five live strategies, automated execution, real-time risk management. US equities + crypto.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://apextrader.io">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='12' fill='%23000'/><polygon points='20,70 38,40 54,55 72,25 80,35' fill='none' stroke='%2310b981' stroke-width='6' stroke-linejoin='round' stroke-linecap='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #000;
+      color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Design Tokens ──────────────────────────────────────────── */
+    :root {
+      --black:       #000000;
+      --black2:      #0a0a0a;
+      --black3:      #111111;
+      --black4:      #1a1a1a;
+      --black5:      #222222;
+      --green:       #10b981;
+      --green-dark:  #059669;
+      --green-glow:  rgba(16,185,129,0.15);
+      --green-glow2: rgba(16,185,129,0.08);
+      --gold:        #f59e0b;
+      --gold-dark:   #d97706;
+      --gold-glow:   rgba(245,158,11,0.15);
+      --red:         #ef4444;
+      --red-glow:    rgba(239,68,68,0.12);
+      --white:       #ffffff;
+      --text:        #f5f5f5;
+      --text2:       #a3a3a3;
+      --text3:       #525252;
+      --border:      rgba(255,255,255,0.08);
+      --border2:     rgba(255,255,255,0.04);
+      --mono:        'JetBrains Mono', monospace;
+    }
+
+    /* ── Utilities ──────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .mono { font-family: var(--mono); }
+    .green { color: var(--green); }
+    .gold  { color: var(--gold); }
+    .red   { color: var(--red); }
+    .text2 { color: var(--text2); }
+
+    /* ── Ticker Strip ───────────────────────────────────────────── */
+    .ticker-strip {
+      background: var(--black2);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      animation: ticker-scroll 30s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 28px;
+      font-family: var(--mono);
+      font-size: 11px;
+      border-right: 1px solid var(--border);
+    }
+    .ticker-sym { color: var(--text); font-weight: 700; letter-spacing: 0.05em; }
+    .ticker-price { color: var(--text2); }
+    .ticker-chg.up   { color: var(--green); }
+    .ticker-chg.down { color: var(--red); }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ── Nav ────────────────────────────────────────────────────── */
+    nav {
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 36px;
+      z-index: 99;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+    .nav-logo svg { flex-shrink: 0; }
+    .nav-logo span { color: var(--green); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text2);
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--green);
+      color: var(--black);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 20px;
+      border-radius: 6px;
+      letter-spacing: 0.03em;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: #0ea572; transform: translateY(-1px); }
+    .nav-mobile { display: none; }
+
+    /* ── Hero ───────────────────────────────────────────────────── */
+    .hero {
+      min-height: calc(100vh - 100px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+      padding: 80px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 62px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--green);
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 480px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--green);
+      color: var(--black);
+      font-weight: 700;
+      font-size: 14px;
+      padding: 14px 28px;
+      border-radius: 8px;
+      letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      background: #0ea572;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(16,185,129,0.3);
+    }
+    .btn-ghost {
+      color: var(--text2);
+      font-weight: 500;
+      font-size: 14px;
+      padding: 14px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 40px;
+      padding-top: 36px;
+      border-top: 1px solid var(--border);
+    }
+    .hero-stat-val {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .hero-stat-val.green { color: var(--green); }
+    .hero-stat-lbl {
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    /* ── Dashboard Mockup ───────────────────────────────────────── */
+    .dashboard-mockup {
+      background: var(--black2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .dash-titlebar {
+      background: var(--black3);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .dash-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .dash-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dd1 { background: #ef4444; }
+    .dd2 { background: #f59e0b; }
+    .dd3 { background: #10b981; }
+    .dash-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      margin-left: 6px;
+      letter-spacing: 0.05em;
+    }
+    .dash-status {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--green);
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 100px;
+      padding: 2px 10px;
+      letter-spacing: 0.08em;
+    }
+    .dash-body {
+      padding: 16px;
+    }
+    /* P&L Line Chart */
+    .dash-pnl-chart {
+      background: var(--black3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .dash-chart-lbl {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .dash-chart-val {
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+    }
+    .dash-chart-chg {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      background: rgba(16,185,129,0.1);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+    .pnl-svg {
+      width: 100%;
+      height: 72px;
+    }
+    .pnl-line {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw-line 2.4s ease forwards 0.6s;
+    }
+    .pnl-fill {
+      fill: url(#pnl-grad);
+      opacity: 0;
+      animation: fade-fill 0.5s ease forwards 3s;
+    }
+    @keyframes draw-line {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes fade-fill {
+      to { opacity: 1; }
+    }
+    /* Candlestick chart */
+    .dash-candle-chart {
+      background: var(--black3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .candle-svg {
+      width: 100%;
+      height: 80px;
+    }
+    .candle-wick { stroke-width: 1.5; stroke-linecap: round; }
+    .candle-body { rx: 2; }
+    .candle-up   { fill: var(--green); stroke: var(--green); }
+    .candle-down { fill: var(--red);   stroke: var(--red);   }
+    /* Signal row */
+    .dash-signals {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    .dash-signal {
+      background: var(--black3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .sig-name {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 4px;
+    }
+    .sig-val {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .sig-up   { color: var(--green); }
+    .sig-down { color: var(--red); }
+    .sig-neu  { color: var(--gold); }
+    .sig-bar {
+      margin-top: 6px;
+      height: 2px;
+      background: var(--black5);
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .sig-bar-fill {
+      height: 100%;
+      border-radius: 1px;
+      animation: bar-grow 1.2s ease forwards;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+    @keyframes bar-grow {
+      to { transform: scaleX(1); }
+    }
+
+    /* ── Section Base ───────────────────────────────────────────── */
+    section { padding: 100px 0; }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--text2);
+      line-height: 1.7;
+      max-width: 520px;
+    }
+    .section-head { margin-bottom: 60px; }
+
+    /* ── The Edge ───────────────────────────────────────────────── */
+    #edge { background: var(--black2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .edge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .edge-card {
+      background: var(--black2);
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .edge-card:hover { background: #0f0f0f; }
+    .edge-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+    }
+    .edge-card:nth-child(1)::before { background: var(--green); }
+    .edge-card:nth-child(2)::before { background: var(--gold); }
+    .edge-card:nth-child(3)::before { background: #6366f1; }
+    .edge-number {
+      font-family: var(--mono);
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 10px;
+      letter-spacing: -0.03em;
+    }
+    .edge-card:nth-child(1) .edge-number { color: var(--green); }
+    .edge-card:nth-child(2) .edge-number { color: var(--gold); }
+    .edge-card:nth-child(3) .edge-number { color: #6366f1; }
+    .edge-label {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .edge-desc { font-size: 14px; color: var(--text2); line-height: 1.6; }
+    .edge-bg-num {
+      position: absolute;
+      right: 20px;
+      bottom: -10px;
+      font-family: var(--mono);
+      font-size: 100px;
+      font-weight: 900;
+      opacity: 0.04;
+      pointer-events: none;
+      letter-spacing: -0.05em;
+    }
+
+    /* ── Strategies ─────────────────────────────────────────────── */
+    #strategies { background: var(--black); }
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .strat-card {
+      background: var(--black2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .strat-card:hover {
+      border-color: rgba(16,185,129,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(16,185,129,0.1);
+    }
+    .strat-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+    .tag-equity { background: rgba(99,102,241,0.12); color: #818cf8; border: 1px solid rgba(99,102,241,0.2); }
+    .tag-crypto { background: rgba(245,158,11,0.1);  color: var(--gold); border: 1px solid rgba(245,158,11,0.2); }
+    .tag-both   { background: rgba(16,185,129,0.1);  color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+    .strat-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+    .strat-desc { font-size: 12px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; }
+    .strat-mini-chart { margin-bottom: 14px; }
+    .strat-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border2);
+    }
+    .strat-rr {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .strat-mkt { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+    /* ── Performance ────────────────────────────────────────────── */
+    #performance { background: var(--black2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .perf-wrap {
+      background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(0,0,0,0) 60%);
+      border: 1px solid rgba(16,185,129,0.15);
+      border-radius: 20px;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .perf-wrap::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .perf-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 48px;
+    }
+    .perf-badge {
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--green);
+      text-align: right;
+      line-height: 1.8;
+    }
+    .perf-badge strong { font-size: 18px; display: block; }
+    .perf-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .perf-metric {
+      background: var(--black2);
+      padding: 28px 24px;
+    }
+    .perf-metric-val {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .perf-metric-val.green { color: var(--green); }
+    .perf-metric-val.gold  { color: var(--gold); }
+    .perf-metric-lbl {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-family: var(--mono);
+    }
+    .perf-note {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: var(--mono);
+    }
+
+    /* ── How It Works — Vertical Timeline ───────────────────────── */
+    #how { background: var(--black); }
+    .timeline {
+      position: relative;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--green), rgba(16,185,129,0.1));
+    }
+    .tl-item {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 24px;
+      margin-bottom: 52px;
+      position: relative;
+    }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-node {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--black2);
+      border: 1px solid rgba(16,185,129,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
+    }
+    .tl-item:hover .tl-node {
+      background: rgba(16,185,129,0.1);
+      border-color: var(--green);
+      box-shadow: 0 0 20px rgba(16,185,129,0.2);
+    }
+    .tl-body { padding-top: 14px; }
+    .tl-step {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .tl-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .tl-desc { font-size: 15px; color: var(--text2); line-height: 1.65; }
+
+    /* ── Risk ───────────────────────────────────────────────────── */
+    #risk { background: var(--black2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .risk-inner {
+      background: rgba(239,68,68,0.04);
+      border: 1px solid rgba(239,68,68,0.15);
+      border-radius: 12px;
+      padding: 40px 48px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 32px;
+      align-items: start;
+    }
+    .risk-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+    .risk-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fca5a5;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .risk-text {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.75;
+    }
+    .risk-text strong { color: #fca5a5; }
+
+    /* ── Pricing ────────────────────────────────────────────────── */
+    #pricing { background: var(--black); }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .price-card {
+      background: var(--black2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      position: relative;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .price-card:hover { transform: translateY(-4px); }
+    .price-card.featured {
+      border-color: rgba(16,185,129,0.4);
+      background: linear-gradient(160deg, rgba(16,185,129,0.06) 0%, var(--black2) 50%);
+      transform: scale(1.03);
+    }
+    .price-card.featured:hover { transform: scale(1.03) translateY(-4px); }
+    .price-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: var(--black);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 4px 14px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .price-badge.gold-badge {
+      background: var(--gold);
+    }
+    .price-tier {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 10px;
+    }
+    .price-name {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .price-amt {
+      font-family: var(--mono);
+      font-size: 44px;
+      font-weight: 700;
+      line-height: 1;
+      margin: 18px 0 6px;
+      letter-spacing: -0.03em;
+    }
+    .price-amt sup {
+      font-size: 20px;
+      font-weight: 500;
+      vertical-align: super;
+      color: var(--text2);
+    }
+    .price-amt span { color: var(--text2); font-size: 16px; font-weight: 400; }
+    .price-desc { font-size: 14px; color: var(--text2); margin-bottom: 28px; line-height: 1.5; }
+    .price-divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .price-features { list-style: none; margin-bottom: 32px; }
+    .price-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text2);
+      padding: 6px 0;
+    }
+    .price-features li::before {
+      content: '';
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.3);
+      flex-shrink: 0;
+      margin-top: 2px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8l3 3 5-5' stroke='%2310b981' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-size: 14px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .price-cta {
+      display: block;
+      text-align: center;
+      padding: 13px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      transition: all 0.2s;
+    }
+    .price-cta.green-cta {
+      background: var(--green);
+      color: var(--black);
+    }
+    .price-cta.green-cta:hover {
+      background: #0ea572;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+    }
+    .price-cta.gold-cta {
+      background: var(--gold);
+      color: var(--black);
+    }
+    .price-cta.gold-cta:hover {
+      background: var(--gold-dark);
+      box-shadow: 0 8px 24px rgba(245,158,11,0.3);
+    }
+    .price-cta.ghost-cta {
+      border: 1px solid var(--border);
+      color: var(--text2);
+    }
+    .price-cta.ghost-cta:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer {
+      background: var(--black2);
+      border-top: 1px solid var(--border);
+      padding: 60px 24px 32px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      max-width: 1200px;
+      margin: 0 auto 48px;
+    }
+    .footer-brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .footer-brand-name span { color: var(--green); }
+    .footer-tagline { font-size: 13px; color: var(--text2); line-height: 1.6; max-width: 260px; }
+    .footer-col-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a { font-size: 13px; color: var(--text2); transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 28px;
+      border-top: 1px solid var(--border2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-copy { font-size: 12px; color: var(--text3); font-family: var(--mono); }
+    .footer-legal { font-size: 12px; color: var(--text3); }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; gap: 48px; }
+      .dashboard-mockup { order: -1; }
+      .edge-grid { grid-template-columns: 1fr; gap: 2px; }
+      .perf-grid { grid-template-columns: repeat(2, 1fr); }
+      .perf-top { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .price-card.featured { transform: none; }
+      .footer-top { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      section { padding: 64px 0; }
+      .perf-wrap { padding: 32px 24px; }
+      .risk-inner { grid-template-columns: 1fr; }
+      .nav-links, .nav-cta { display: none; }
+      .nav-mobile { display: block; font-size: 22px; cursor: pointer; }
+      .footer-top { grid-template-columns: 1fr; }
+      .hero-stats { flex-wrap: wrap; gap: 20px; }
+    }
+
+    /* ── Testimonials ─────────────────────────────────────────── */
+    #testimonials { padding: 100px 0; background: var(--black2); border-top: 1px solid var(--border); }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 3rem; }
+    @media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+    .testi-card {
+      background: var(--black3); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.75rem; transition: all .3s;
+    }
+    .testi-card:hover { border-color: rgba(16,185,129,0.3); box-shadow: 0 0 24px var(--green-glow); }
+    .testi-stars { display: flex; gap: .2rem; margin-bottom: 1rem; color: var(--gold); font-size: .95rem; }
+    .testi-quote { font-size: .9rem; color: var(--text2); line-height: 1.75; margin-bottom: 1.25rem; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: .75rem; }
+    .testi-avatar {
+      width: 60px; height: 60px; border-radius: 50%; object-fit: cover;
+      flex-shrink: 0; border: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+    .testi-name { font-size: .88rem; font-weight: 700; color: var(--white); }
+    .testi-role { font-size: .75rem; color: var(--text3); margin-top: .15rem; }
+  </style>
+</head>
+<body>
+
+<!-- ── Ticker Strip ──────────────────────────────────────────────── -->
+<div class="ticker-strip" aria-hidden="true">
+  <div class="ticker-track" id="ticker-track">
+    <!-- items injected by JS -->
+  </div>
+</div>
+
+<!-- ── Nav ──────────────────────────────────────────────────────── -->
+<nav role="navigation" aria-label="Main">
+  <div class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <rect width="28" height="28" rx="7" fill="#000"/>
+      <polyline points="4,20 10,11 16,15 22,6" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="22" cy="6" r="2.5" fill="#10b981"/>
+    </svg>
+    Apex<span>Trader</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#edge">The Edge</a></li>
+    <li><a href="#strategies">Strategies</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+  <a href="#pricing" class="nav-cta">Get Access</a>
+  <button class="nav-mobile" aria-label="Menu">&#9776;</button>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<main>
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-eyebrow">Live Trading System</div>
+    <h1>Trade Like A<br><em>Quant Desk</em></h1>
+    <p class="hero-sub">Five institutional-grade algorithms running 24/7 across US equities and crypto — with built-in risk controls that protect capital before chasing alpha.</p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Start Trading
+      </a>
+      <a href="#how" class="btn-ghost">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.5L10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        How It Works
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-val green">2.5:1</div>
+        <div class="hero-stat-lbl">Avg R/R Ratio</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">5</div>
+        <div class="hero-stat-lbl">Strategies</div>
+      </div>
+      <div>
+        <div class="hero-stat-val">$300</div>
+        <div class="hero-stat-lbl">Daily Loss Cap</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Mockup -->
+  <div class="dashboard-mockup" aria-hidden="true">
+    <div class="dash-titlebar">
+      <div class="dash-dots">
+        <div class="dash-dot dd1"></div>
+        <div class="dash-dot dd2"></div>
+        <div class="dash-dot dd3"></div>
+      </div>
+      <span class="dash-title">APEX · LIVE DASHBOARD</span>
+      <span class="dash-status">● LIVE</span>
+    </div>
+    <div class="dash-body">
+      <!-- P&L Chart -->
+      <div class="dash-pnl-chart">
+        <div class="dash-chart-header">
+          <div>
+            <div class="dash-chart-lbl">Portfolio P&amp;L — Today</div>
+            <div class="dash-chart-val">+$847.20</div>
+          </div>
+          <span class="dash-chart-chg">+3.39%</span>
+        </div>
+        <svg class="pnl-svg" viewBox="0 0 340 72" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="pnl-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <polygon class="pnl-fill" points="0,72 0,58 30,54 55,60 75,45 100,40 125,44 150,30 175,26 200,28 225,18 255,14 280,10 310,8 340,4 340,72"/>
+          <polyline class="pnl-line" points="0,58 30,54 55,60 75,45 100,40 125,44 150,30 175,26 200,28 225,18 255,14 280,10 310,8 340,4"/>
+        </svg>
+      </div>
+      <!-- Candlestick -->
+      <div class="dash-candle-chart">
+        <div class="dash-chart-lbl" style="margin-bottom:10px">NVDA · 5-MIN</div>
+        <svg class="candle-svg" viewBox="0 0 340 80" preserveAspectRatio="none">
+          <!-- Candles: x, wickTop, bodyTop, bodyH, wickBot, up/down -->
+          <!-- Format: line x1 x1 y1 y2, rect x y w h -->
+          <g class="candle-up">
+            <line class="candle-wick" x1="18" y1="8"  x2="18" y2="60"/>
+            <rect class="candle-body" x="12" y="25" width="12" height="22"/>
+          </g>
+          <g class="candle-down">
+            <line class="candle-wick" x1="40" y1="12" x2="40" y2="58"/>
+            <rect class="candle-body" x="34" y="20" width="12" height="24"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="62" y1="20" x2="62" y2="65"/>
+            <rect class="candle-body" x="56" y="36" width="12" height="20"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="84" y1="15" x2="84" y2="55"/>
+            <rect class="candle-body" x="78" y="25" width="12" height="18"/>
+          </g>
+          <g class="candle-down">
+            <line class="candle-wick" x1="106" y1="10" x2="106" y2="52"/>
+            <rect class="candle-body" x="100" y="14" width="12" height="26"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="128" y1="16" x2="128" y2="58"/>
+            <rect class="candle-body" x="122" y="28" width="12" height="20"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="150" y1="8"  x2="150" y2="50"/>
+            <rect class="candle-body" x="144" y="18" width="12" height="20"/>
+          </g>
+          <g class="candle-down">
+            <line class="candle-wick" x1="172" y1="12" x2="172" y2="55"/>
+            <rect class="candle-body" x="166" y="16" width="12" height="22"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="194" y1="5"  x2="194" y2="48"/>
+            <rect class="candle-body" x="188" y="16" width="12" height="22"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="216" y1="4"  x2="216" y2="42"/>
+            <rect class="candle-body" x="210" y="10" width="12" height="20"/>
+          </g>
+          <g class="candle-down">
+            <line class="candle-wick" x1="238" y1="8"  x2="238" y2="48"/>
+            <rect class="candle-body" x="232" y="12" width="12" height="24"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="260" y1="6"  x2="260" y2="44"/>
+            <rect class="candle-body" x="254" y="12" width="12" height="18"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="282" y1="2"  x2="282" y2="40"/>
+            <rect class="candle-body" x="276" y="8"  width="12" height="18"/>
+          </g>
+          <g class="candle-up">
+            <line class="candle-wick" x1="304" y1="1"  x2="304" y2="36"/>
+            <rect class="candle-body" x="298" y="5"  width="12" height="18"/>
+          </g>
+        </svg>
+      </div>
+      <!-- Signal Row -->
+      <div class="dash-signals">
+        <div class="dash-signal">
+          <div class="sig-name">MOM_BRK</div>
+          <div class="sig-val sig-up">LONG ↑</div>
+          <div class="sig-bar"><div class="sig-bar-fill" style="width:78%;background:var(--green);animation-delay:0.2s"></div></div>
+        </div>
+        <div class="dash-signal">
+          <div class="sig-name">VWAP_RCL</div>
+          <div class="sig-val sig-neu">WATCH</div>
+          <div class="sig-bar"><div class="sig-bar-fill" style="width:44%;background:var(--gold);animation-delay:0.4s"></div></div>
+        </div>
+        <div class="dash-signal">
+          <div class="sig-name">ORB</div>
+          <div class="sig-val sig-up">LONG ↑</div>
+          <div class="sig-bar"><div class="sig-bar-fill" style="width:88%;background:var(--green);animation-delay:0.6s"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── The Edge ──────────────────────────────────────────────────── -->
+<section id="edge">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Why ApexTrader</div>
+      <h2 class="section-title">The Edge</h2>
+      <p class="section-sub">Purpose-built for disciplined execution. Every parameter exists for a reason.</p>
+    </div>
+    <div class="edge-grid">
+      <div class="edge-card">
+        <div class="edge-number">2.5:1</div>
+        <div class="edge-label">Risk/Reward Ratio</div>
+        <div class="edge-desc">Minimum 2.5:1 R/R enforced on every signal before entry. The system never takes bad trades — it simply doesn't execute them.</div>
+        <div class="edge-bg-num">2.5</div>
+      </div>
+      <div class="edge-card">
+        <div class="edge-number">5</div>
+        <div class="edge-label">Live Strategies</div>
+        <div class="edge-desc">Momentum, mean reversion, VWAP reclaim, trend continuation, and opening range breakout — diversified alpha across market regimes.</div>
+        <div class="edge-bg-num">5</div>
+      </div>
+      <div class="edge-card">
+        <div class="edge-number">$300</div>
+        <div class="edge-label">Daily Loss Limit</div>
+        <div class="edge-desc">Hard circuit breaker halts all trading at $300 daily loss. Capital preservation is non-negotiable — drawdown-adjusted position sizing enforces it systematically.</div>
+        <div class="edge-bg-num">300</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Strategies ────────────────────────────────────────────────── -->
+<section id="strategies">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Alpha Sources</div>
+      <h2 class="section-title">Five-Strategy<br>Architecture</h2>
+      <p class="section-sub">Each strategy targets a distinct market inefficiency with independently verified edge and defined risk parameters.</p>
+    </div>
+    <div class="strategy-grid">
+
+      <!-- Momentum Breakout -->
+      <div class="strat-card">
+        <span class="strat-tag tag-both">Equities + Crypto</span>
+        <div class="strat-name">Momentum Breakout</div>
+        <div class="strat-desc">N-period high breakout confirmed by RSI 40–70 and multi-timeframe alignment.</div>
+        <div class="strat-mini-chart">
+          <svg viewBox="0 0 180 50" width="100%" height="50">
+            <polyline points="0,40 25,38 45,35 65,28 80,20 95,18 115,10 140,8 165,5 180,3" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- breakout mark -->
+            <line x1="115" y1="5" x2="115" y2="45" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.5"/>
+            <circle cx="115" cy="10" r="3.5" fill="#10b981" opacity="0.9"/>
+          </svg>
+        </div>
+        <div class="strat-meta">
+          <span class="strat-rr">R/R 2.5:1</span>
+          <span class="strat-mkt">RSI + MTF</span>
+        </div>
+      </div>
+
+      <!-- Trend Continuation -->
+      <div class="strat-card">
+        <span class="strat-tag tag-both">Equities + Crypto</span>
+        <div class="strat-name">Trend Continuation</div>
+        <div class="strat-desc">Pullbacks to EMA-21 in an established uptrend — buying the dip within the trend.</div>
+        <div class="strat-mini-chart">
+          <svg viewBox="0 0 180 50" width="100%" height="50">
+            <!-- EMA line -->
+            <polyline points="0,45 30,40 60,33 90,25 120,18 150,12 180,7" fill="none" stroke="#6366f1" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- price bouncing off EMA -->
+            <polyline points="0,44 30,39 55,28 65,36 80,32 90,24 110,17 130,14 150,11 180,6" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="65" cy="36" r="3" fill="#f59e0b"/>
+          </svg>
+        </div>
+        <div class="strat-meta">
+          <span class="strat-rr">R/R 3:1</span>
+          <span class="strat-mkt">EMA-21</span>
+        </div>
+      </div>
+
+      <!-- Mean Reversion -->
+      <div class="strat-card">
+        <span class="strat-tag tag-both">Equities + Crypto</span>
+        <div class="strat-name">Mean Reversion</div>
+        <div class="strat-desc">RSI extremes at Bollinger Band touches — fading overextension back to the mean.</div>
+        <div class="strat-mini-chart">
+          <svg viewBox="0 0 180 50" width="100%" height="50">
+            <!-- upper band -->
+            <polyline points="0,8 180,8" fill="none" stroke="#525252" stroke-width="0.8"/>
+            <!-- lower band -->
+            <polyline points="0,42 180,42" fill="none" stroke="#525252" stroke-width="0.8"/>
+            <!-- mid -->
+            <polyline points="0,25 180,25" fill="none" stroke="#525252" stroke-width="0.5" stroke-dasharray="3,4"/>
+            <!-- price -->
+            <polyline points="0,22 20,20 40,15 55,8 70,12 90,22 110,30 130,38 145,42 160,36 180,28" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="55" cy="8" r="3" fill="#ef4444"/>
+            <circle cx="145" cy="42" r="3" fill="#10b981"/>
+          </svg>
+        </div>
+        <div class="strat-meta">
+          <span class="strat-rr">R/R 1.75:1</span>
+          <span class="strat-mkt">Bollinger + RSI</span>
+        </div>
+      </div>
+
+      <!-- VWAP Reclaim -->
+      <div class="strat-card">
+        <span class="strat-tag tag-equity">Equities Only</span>
+        <div class="strat-name">VWAP Reclaim</div>
+        <div class="strat-desc">Equity-only, 9:45–15:30 ET. Dip below VWAP and aggressive reclaim signals institutional accumulation.</div>
+        <div class="strat-mini-chart">
+          <svg viewBox="0 0 180 50" width="100%" height="50">
+            <!-- VWAP -->
+            <polyline points="0,20 180,22" fill="none" stroke="#818cf8" stroke-width="1" stroke-dasharray="4,3"/>
+            <!-- price dips below then reclaims -->
+            <polyline points="0,18 30,19 55,22 70,30 85,35 100,22 120,15 145,12 180,10" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="85" cy="35" r="3" fill="#ef4444" opacity="0.8"/>
+            <circle cx="100" cy="22" r="3" fill="#10b981"/>
+          </svg>
+        </div>
+        <div class="strat-meta">
+          <span class="strat-rr">R/R 2:1</span>
+          <span class="strat-mkt">VWAP</span>
+        </div>
+      </div>
+
+      <!-- ORB -->
+      <div class="strat-card">
+        <span class="strat-tag tag-equity">Equities Only</span>
+        <div class="strat-name">Opening Range Breakout</div>
+        <div class="strat-desc">First 30-min high/low established 9:30–11:30 ET. Clean break with volume confirmation triggers entry.</div>
+        <div class="strat-mini-chart">
+          <svg viewBox="0 0 180 50" width="100%" height="50">
+            <!-- range box -->
+            <rect x="0" y="18" width="60" height="14" fill="rgba(99,102,241,0.08)" stroke="rgba(99,102,241,0.3)" stroke-width="0.8"/>
+            <!-- breakout -->
+            <line x1="60" y1="18" x2="180" y2="18" stroke="#525252" stroke-width="0.7" stroke-dasharray="3,3"/>
+            <polyline points="0,25 30,24 60,19 80,14 105,9 130,7 160,5 180,4" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="60" cy="18" r="3.5" fill="#10b981"/>
+          </svg>
+        </div>
+        <div class="strat-meta">
+          <span class="strat-rr">R/R 2:1</span>
+          <span class="strat-mkt">ORB 30-min</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Performance ───────────────────────────────────────────────── -->
+<section id="performance">
+  <div class="container">
+    <div class="perf-wrap">
+      <div class="perf-top">
+        <div>
+          <div class="section-label">System Metrics</div>
+          <h2 class="section-title">Built for<br>Consistent Returns</h2>
+          <p class="section-sub">ATR-based position sizing scales with volatility. Regime detection shifts strategy weights. Conviction scoring adjusts size before every entry.</p>
+        </div>
+        <div class="perf-badge">
+          <span>Capital Deployed</span>
+          <strong>$25,000</strong>
+          <span>Max Position<br>$2,000 / trade</span>
+        </div>
+      </div>
+      <div class="perf-grid">
+        <div class="perf-metric">
+          <div class="perf-metric-val green">2.5:1</div>
+          <div class="perf-metric-lbl">Min R/R</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val">ATR</div>
+          <div class="perf-metric-lbl">Position Sizing</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val gold">4-Stage</div>
+          <div class="perf-metric-lbl">Circuit Breaker</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val">60s</div>
+          <div class="perf-metric-lbl">Scan Interval</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val green">$300</div>
+          <div class="perf-metric-lbl">Daily Stop</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val">5</div>
+          <div class="perf-metric-lbl">Concurrent Algos</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val">3</div>
+          <div class="perf-metric-lbl">Regime States</div>
+        </div>
+        <div class="perf-metric">
+          <div class="perf-metric-val gold">24/7</div>
+          <div class="perf-metric-lbl">Crypto Coverage</div>
+        </div>
+      </div>
+      <p class="perf-note">* Past system design does not guarantee future results. All trading involves risk of loss.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ──────────────────────────────────────────────── -->
+<section id="how">
+  <div class="container">
+    <div class="section-head" style="text-align:center; max-width:480px; margin:0 auto 72px;">
+      <div class="section-label">Process</div>
+      <h2 class="section-title">From Zero to<br>Live in Days</h2>
+      <p class="section-sub" style="margin:0 auto;">No quant PhD required. The system does the heavy lifting — you set the parameters.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-node">01</div>
+        <div class="tl-body">
+          <div class="tl-step">Step 01</div>
+          <div class="tl-title">Create Account</div>
+          <div class="tl-desc">Sign up and connect your broker credentials via encrypted API key storage. Supports Alpaca (equities) and Coinbase (crypto) out of the box.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-node">02</div>
+        <div class="tl-body">
+          <div class="tl-step">Step 02</div>
+          <div class="tl-title">Configure Your Risk</div>
+          <div class="tl-desc">Set your daily loss limit, max position size, and which strategies to enable. The risk manager enforces your parameters — hard stops, not suggestions.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-node">03</div>
+        <div class="tl-body">
+          <div class="tl-step">Step 03</div>
+          <div class="tl-title">Paper Trade</div>
+          <div class="tl-desc">Run in simulation mode with real market data and no capital at risk. Validate signals, review the dashboard, and build confidence before going live.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-node">04</div>
+        <div class="tl-body">
+          <div class="tl-step">Step 04</div>
+          <div class="tl-title">Go Live</div>
+          <div class="tl-desc">Flip the switch. Automated execution, real-time Telegram/Discord alerts, and a live Streamlit dashboard keep you informed without chaining you to a screen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Risk Disclosure ───────────────────────────────────────────── -->
+<section id="risk" style="padding:60px 0;">
+  <div class="container">
+    <div class="risk-inner">
+      <div class="risk-icon" aria-hidden="true">⚠</div>
+      <div>
+        <div class="risk-title">Risk Disclosure</div>
+        <p class="risk-text">
+          <strong>Algorithmic trading involves substantial risk of loss and is not suitable for all investors.</strong> Past performance of any trading system, strategy, or methodology is not necessarily indicative of future results. You could lose some or all of your capital. ApexTrader is a software tool and a product of BNG Contracting Enterprises LLC — it does not provide investment advice, and no signal or signal service guarantees profitability. Before trading with real capital, thoroughly understand the risks involved, ensure you have sufficient risk capital, and consider consulting a licensed financial advisor. By using ApexTrader, you acknowledge that you are solely responsible for your own trading decisions.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Pricing ───────────────────────────────────────────────────── -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-head" style="text-align:center; max-width:520px; margin:0 auto 64px;">
+      <div class="section-label">Plans</div>
+      <h2 class="section-title">Access the System</h2>
+      <p class="section-sub" style="margin:0 auto;">Institutional-grade execution at a fraction of the cost of a prime brokerage setup.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Signals -->
+      <div class="price-card">
+        <div class="price-tier">Tier 1</div>
+        <div class="price-name">Signals</div>
+        <div class="price-amt"><sup>$</sup>99<span>/mo</span></div>
+        <div class="price-desc">Real-time trade signals delivered to Telegram and Discord. You execute manually.</div>
+        <hr class="price-divider">
+        <ul class="price-features">
+          <li>All 5 strategy signals</li>
+          <li>Entry, stop, and target levels</li>
+          <li>Conviction scoring per signal</li>
+          <li>Telegram + Discord delivery</li>
+          <li>Daily P&amp;L summary report</li>
+        </ul>
+        <a href="#" class="price-cta ghost-cta">Get Signals</a>
+      </div>
+
+      <!-- Managed -->
+      <div class="price-card featured">
+        <div class="price-badge">Most Popular</div>
+        <div class="price-tier">Tier 2</div>
+        <div class="price-name">Managed</div>
+        <div class="price-amt"><sup>$</sup>299<span>/mo</span></div>
+        <div class="price-desc">Full automated execution. Connect your broker, set your limits, and the system trades for you.</div>
+        <hr class="price-divider">
+        <ul class="price-features">
+          <li>Everything in Signals</li>
+          <li>Automated trade execution</li>
+          <li>ATR position sizing engine</li>
+          <li>4-stage circuit breaker</li>
+          <li>Live Streamlit dashboard</li>
+          <li>Regime detection overlay</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="price-cta green-cta">Start Managed</a>
+      </div>
+
+      <!-- Custom -->
+      <div class="price-card">
+        <div class="price-badge gold-badge">Enterprise</div>
+        <div class="price-tier">Tier 3</div>
+        <div class="price-name">Custom</div>
+        <div class="price-amt" style="font-size:30px;margin-top:26px;">Let's Talk</div>
+        <div class="price-desc">Bespoke strategy development, dedicated infrastructure, and white-glove onboarding for serious capital.</div>
+        <hr class="price-divider">
+        <ul class="price-features">
+          <li>Everything in Managed</li>
+          <li>Custom strategy development</li>
+          <li>Dedicated infrastructure</li>
+          <li>Multi-account management</li>
+          <li>SLA-backed uptime guarantee</li>
+          <li>Direct engineer access</li>
+          <li>Backtesting reports on demand</li>
+        </ul>
+        <a href="mailto:hello@apextrader.io" class="price-cta gold-cta">Contact Us</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ──────────────────────────────────────────────── -->
+<section id="testimonials">
+  <div class="container">
+    <div style="text-align:center; max-width:480px; margin:0 auto 0;">
+      <div class="section-label">Trader Reviews</div>
+      <h2 class="section-title">What our traders say</h2>
+      <p class="section-sub" style="margin:0 auto;">From retail investors to experienced quants — real feedback from people running live capital.</p>
+    </div>
+    <div class="testi-grid">
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I've tried three other signal services and none of them had the risk controls ApexTrader does. The 4-stage circuit breaker saved me during the March volatility spike. This system thinks like a pro."</p>
+        <div class="testi-author">
+          <img class="testi-avatar" src="https://i.pravatar.cc/150?img=53" alt="Alex M.">
+          <div>
+            <div class="testi-name">Alex M.</div>
+            <div class="testi-role">Day Trader, 4 years</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I'm not a quant, I'm a nurse who wanted her savings working harder. The managed tier made that possible — I set my limits, it handles everything else. Best financial decision I've made."</p>
+        <div class="testi-author">
+          <img class="testi-avatar" src="https://i.pravatar.cc/150?img=25" alt="Jennifer K.">
+          <div>
+            <div class="testi-name">Jennifer K.</div>
+            <div class="testi-role">Retail Investor</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"Coming from manual options trading, the ATR-based sizing and regime detection is a revelation. No more guessing position size or ignoring market conditions. Pure discipline, automated."</p>
+        <div class="testi-author">
+          <img class="testi-avatar" src="https://i.pravatar.cc/150?img=11" alt="David C.">
+          <div>
+            <div class="testi-name">David C.</div>
+            <div class="testi-role">Former Options Trader</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ── Footer ────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">Apex<span>Trader</span></div>
+      <p class="footer-tagline">Institutional-grade algorithmic trading for disciplined investors. Five strategies, one system, zero emotion.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Product</div>
+      <ul class="footer-links">
+        <li><a href="#strategies">Strategies</a></li>
+        <li><a href="#performance">Performance</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#how">How It Works</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">System</div>
+      <ul class="footer-links">
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">API Reference</a></li>
+        <li><a href="#">Status</a></li>
+        <li><a href="#">Changelog</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Legal</div>
+      <ul class="footer-links">
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Risk Disclosure</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2026 ApexTrader, a division of BNG Contracting Enterprises LLC. All rights reserved.</span>
+    <span class="footer-legal">Not investment advice. Trading involves risk of loss.</span>
+  </div>
+  <div style="text-align:center; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; opacity: 0.7;">
+    <a href="https://efficio.tech" target="_blank" style="color: #10b981; text-decoration: none; font-size: 0.8rem; letter-spacing: 1px;">
+      ⚡ Powered by <strong>efficio.tech</strong>
+    </a>
+  </div>
+</footer>
+
+<!-- ── Scripts ───────────────────────────────────────────────────── -->
+<script>
+(function () {
+  'use strict';
+
+  /* ── Ticker data ─────────────────────────────────────────────── */
+  const tickers = [
+    { sym:'AAPL',  price:'213.47', chg:'+1.24', pct:'+0.58%', up:true  },
+    { sym:'NVDA',  price:'875.30', chg:'+18.60',pct:'+2.17%', up:true  },
+    { sym:'TSLA',  price:'174.82', chg:'-3.15', pct:'-1.77%', up:false },
+    { sym:'SPY',   price:'527.14', chg:'+2.88', pct:'+0.55%', up:true  },
+    { sym:'QQQ',   price:'453.92', chg:'+4.10', pct:'+0.91%', up:true  },
+    { sym:'MSFT',  price:'418.65', chg:'-1.30', pct:'-0.31%', up:false },
+    { sym:'AMZN',  price:'196.44', chg:'+3.72', pct:'+1.93%', up:true  },
+    { sym:'BTC',   price:'71,432', chg:'+980',  pct:'+1.39%', up:true  },
+    { sym:'ETH',   price:'3,512',  chg:'-42',   pct:'-1.18%', up:false },
+    { sym:'SOL',   price:'148.72', chg:'+6.14', pct:'+4.31%', up:true  },
+    { sym:'GOOGL', price:'177.24', chg:'+0.88', pct:'+0.50%', up:true  },
+    { sym:'META',  price:'519.03', chg:'-4.22', pct:'-0.81%', up:false },
+  ];
+
+  function buildTicker() {
+    const track = document.getElementById('ticker-track');
+    if (!track) return;
+    const all = [...tickers, ...tickers]; // doubled for seamless loop
+    const html = all.map(t => `
+      <div class="ticker-item">
+        <span class="ticker-sym">${t.sym}</span>
+        <span class="ticker-price">${t.price}</span>
+        <span class="ticker-chg ${t.up ? 'up' : 'down'}">${t.chg} (${t.pct})</span>
+      </div>`).join('');
+    track.innerHTML = html;
+  }
+
+  /* ── Subtle price wobble ─────────────────────────────────────── */
+  function wobbleTickers() {
+    const items = document.querySelectorAll('.ticker-item');
+    if (!items.length) return;
+    items.forEach((item, i) => {
+      const t = tickers[i % tickers.length];
+      const drift = (Math.random() - 0.5) * 0.4;
+      const base = parseFloat(t.price.replace(/,/g, ''));
+      if (isNaN(base)) return;
+      const newPrice = (base + drift).toFixed(2);
+      const priceEl = item.querySelector('.ticker-price');
+      if (priceEl) priceEl.textContent = newPrice;
+    });
+  }
+
+  /* ── Scroll-reveal ───────────────────────────────────────────── */
+  function initReveal() {
+    const style = document.createElement('style');
+    style.textContent = `
+      .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.55s ease, transform 0.55s ease; }
+      .reveal.visible { opacity:1; transform:none; }
+    `;
+    document.head.appendChild(style);
+
+    const targets = document.querySelectorAll(
+      '.edge-card, .strat-card, .perf-metric, .tl-item, .price-card'
+    );
+    targets.forEach(el => el.classList.add('reveal'));
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    targets.forEach(el => obs.observe(el));
+  }
+
+  /* ── Nav active on scroll ────────────────────────────────────── */
+  function initNavActive() {
+    const sections = document.querySelectorAll('section[id]');
+    const links    = document.querySelectorAll('.nav-links a');
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.style.color = '');
+          const active = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+          if (active) active.style.color = '#10b981';
+        }
+      });
+    }, { rootMargin: '-40% 0px -55%' });
+    sections.forEach(s => obs.observe(s));
+  }
+
+  /* ── Init ────────────────────────────────────────────────────── */
+  document.addEventListener('DOMContentLoaded', function () {
+    buildTicker();
+    initReveal();
+    initNavActive();
+    setInterval(wobbleTickers, 2800);
+  });
+})();
+</script>
+</body>
+</html>
